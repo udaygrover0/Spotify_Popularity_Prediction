@@ -4,6 +4,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+# Load the CSV file
+data = pd.read_csv('spotify_songs.csv')  # Ensure the CSV file is in the correct directory
+
 # Example mapping of genres to their corresponding subgenres
 genre_to_subgenre = {
     'edm': ['big room', 'electro house', 'pop edm', 'progressive electro house'],
