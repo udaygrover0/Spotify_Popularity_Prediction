@@ -35,38 +35,23 @@ selected_feature = st.sidebar.selectbox("Select Feature for Top 10", feature_opt
 # Main Dashboard Title
 st.title("Song Popularity Analysis Dashboard")
 
-# Visualization 1: Heatmaps for All Attributes
-st.subheader("Heatmaps for All Attributes")
-fig, axes = plt.subplots(3, 3, figsize=(15, 15))
-fig.tight_layout(pad=3.0)
-for i, feature in enumerate(feature_options):
-    row, col = divmod(i, 3)
-    sns.heatmap(filtered_data.pivot_table(index='track_artist', 
-                                          columns='track_album_name', 
-                                          values=feature, 
-                                          aggfunc='mean'), 
-                ax=axes[row, col], cmap="YlGnBu")
-    axes[row, col].set_title(f'Heatmap of {feature} by Artist and Album')
-
-st.pyplot(fig)
-
-# Visualization 2: Improved Top 10 Artists/Albums Display (Horizontal Bar Charts)
-st.subheader(f"Top 10 Artists by {selected_feature.capitalize()}")
-top_artists = filtered_data.groupby('track_artist')[selected_feature].mean().sort_values(ascending=False).head(10)
+# Visualization 1: Top 10 Artists/Albums for Selected Genre/Subgenre
+st.subheader(f"Top 10 Artists in {selected_subgenre}")
+top_artists_genre = filtered_data.groupby('track_artist')['track_popularity'].mean().sort_values(ascending=False).head(10)
 fig, ax = plt.subplots()
-sns.barplot(x=top_artists.values, y=top_artists.index, ax=ax, orient='h')
-ax.set_title(f"Top 10 Artists in {selected_subgenre} by {selected_feature.capitalize()}")
+sns.barplot(x=top_artists_genre.values, y=top_artists_genre.index, ax=ax, orient='h')
+ax.set_title(f"Top 10 Artists in {selected_subgenre}")
 st.pyplot(fig)
 
-st.subheader(f"Top 10 Albums by {selected_feature.capitalize()}")
-top_albums = filtered_data.groupby('track_album_name')[selected_feature].mean().sort_values(ascending=False).head(10)
+st.subheader(f"Top 10 Albums in {selected_subgenre}")
+top_albums_genre = filtered_data.groupby('track_album_name')['track_popularity'].mean().sort_values(ascending=False).head(10)
 fig, ax = plt.subplots()
-sns.barplot(x=top_albums.values, y=top_albums.index, ax=ax, orient='h')
-ax.set_title(f"Top 10 Albums in {selected_subgenre} by {selected_feature.capitalize()}")
+sns.barplot(x=top_albums_genre.values, y=top_albums_genre.index, ax=ax, orient='h')
+ax.set_title(f"Top 10 Albums in {selected_subgenre}")
 st.pyplot(fig)
 
-# Visualization 3: Radar Chart (with Normalization)
-st.subheader("Radar Chart: Normalized Feature Averages")
+# Visualization 2: Radar Chart for Song Features
+st.subheader("Radar Chart for Song Features")
 scaler = MinMaxScaler()
 normalized_features = scaler.fit_transform(filtered_data[feature_options])
 normalized_avg_features = np.mean(normalized_features, axis=0)
@@ -82,5 +67,20 @@ ax.plot(angles, stats, color='blue', linewidth=2)
 ax.set_yticklabels([])
 ax.set_xticks(angles[:-1])
 ax.set_xticklabels(labels)
-ax.set_title(f"Normalized Feature Averages for {selected_subgenre}")
+ax.set_title(f"Radar Chart for Song Features in {selected_subgenre}")
+st.pyplot(fig)
+
+# Visualization 3: Top 10 Artists/Albums for Selected Feature
+st.subheader(f"Top 10 Artists by {selected_feature.capitalize()}")
+top_artists_feature = filtered_data.groupby('track_artist')[selected_feature].mean().sort_values(ascending=False).head(10)
+fig, ax = plt.subplots()
+sns.barplot(x=top_artists_feature.values, y=top_artists_feature.index, ax=ax, orient='h')
+ax.set_title(f"Top 10 Artists by {selected_feature.capitalize()} in {selected_subgenre}")
+st.pyplot(fig)
+
+st.subheader(f"Top 10 Albums by {selected_feature.capitalize()}")
+top_albums_feature = filtered_data.groupby('track_album_name')[selected_feature].mean().sort_values(ascending=False).head(10)
+fig, ax = plt.subplots()
+sns.barplot(x=top_albums_feature.values, y=top_albums_feature.index, ax=ax, orient='h')
+ax.set_title(f"Top 10 Albums by {selected_feature.capitalize()} in {selected_subgenre}")
 st.pyplot(fig)
