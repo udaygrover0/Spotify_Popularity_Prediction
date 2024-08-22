@@ -48,7 +48,7 @@ feature_options = ['danceability', 'energy', 'loudness', 'speechiness',
 selected_feature = st.sidebar.selectbox("Select Feature for Top 10", feature_options)
 
 # Main Dashboard Title
-st.title("Song Popularity Analysis Dashboard")
+st.title("Spotify Song Popularity Dashboard")
 
 # Visualization 1: Word Cloud for Album Names
 st.subheader("Word Cloud for Album Names")
