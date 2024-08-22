@@ -19,28 +19,47 @@ genre_to_subgenre = {
     'rock': ['album rock', 'classic rock', 'hard rock', 'permanent wave']
 }
 
-# Function to get the decade from the release year
-def get_decade(year):
-    return int(year) // 10 * 10
+# Adding "All" option to genre and subgenre lists
+all_genres = ['All'] + list(genre_to_subgenre.keys())
+all_subgenres = ['All'] + [subgenre for sublist in genre_to_subgenre.values() for subgenre in sublist]
 
 # Sidebar for Dropdowns
 st.sidebar.title("Filter Options")
-selected_genre = st.sidebar.selectbox("Select Genre", list(genre_to_subgenre.keys()))
-selected_subgenre = st.sidebar.selectbox("Select Subgenre", genre_to_subgenre[selected_genre])
+selected_genre = st.sidebar.selectbox("Select Genre", all_genres)
+
+# Update subgenre options based on selected genre
+if selected_genre == 'All':
+    subgenres = all_subgenres
+else:
+    subgenres = ['All'] + genre_to_subgenre[selected_genre]
+
+selected_subgenre = st.sidebar.selectbox("Select Subgenre", subgenres)
 
 # Decade slider
 min_year = int(data['track_album_release_date'].min()[:4])
 max_year = int(data['track_album_release_date'].max()[:4])
-decade_range = range(get_decade(min_year), get_decade(max_year) + 10, 10)
+decade_range = range((min_year // 10) * 10, (max_year // 10) * 10 + 10, 10)
 selected_decades = st.sidebar.slider("Select Decade(s)", min_value=min(decade_range), 
                                      max_value=max(decade_range), value=(min(decade_range), max(decade_range)), step=10)
 
 # Filter data based on selections
-data['decade'] = data['track_album_release_date'].apply(lambda x: get_decade(x[:4]))
-filtered_data = data[(data['playlist_genre'] == selected_genre) & 
-                     (data['playlist_subgenre'] == selected_subgenre) &
-                     (data['decade'] >= selected_decades[0]) & 
-                     (data['decade'] <= selected_decades[1])]
+data['decade'] = data['track_album_release_date'].apply(lambda x: (int(x[:4]) // 10) * 10)
+
+if selected_genre == 'All' and selected_subgenre == 'All':
+    filtered_data = data[(data['decade'] >= selected_decades[0]) & (data['decade'] <= selected_decades[1])]
+elif selected_genre != 'All' and selected_subgenre == 'All':
+    filtered_data = data[(data['playlist_genre'] == selected_genre) & 
+                         (data['decade'] >= selected_decades[0]) & 
+                         (data['decade'] <= selected_decades[1])]
+elif selected_genre == 'All' and selected_subgenre != 'All':
+    filtered_data = data[(data['playlist_subgenre'] == selected_subgenre) & 
+                         (data['decade'] >= selected_decades[0]) & 
+                         (data['decade'] <= selected_decades[1])]
+else:
+    filtered_data = data[(data['playlist_genre'] == selected_genre) & 
+                         (data['playlist_subgenre'] == selected_subgenre) & 
+                         (data['decade'] >= selected_decades[0]) & 
+                         (data['decade'] <= selected_decades[1])]
 
 # Feature selection for top 10 display
 feature_options = ['danceability', 'energy', 'loudness', 'speechiness', 
@@ -61,18 +80,18 @@ ax.axis('off')
 st.pyplot(fig)
 
 # Visualization 2: Top 10 Artists/Albums for Selected Genre/Subgenre
-st.subheader(f"Top 10 Artists in {selected_subgenre}")
+st.subheader(f"Top 10 Artists in {selected_subgenre if selected_subgenre != 'All' else selected_genre}")
 top_artists_genre = filtered_data.groupby('track_artist')['track_popularity'].mean().sort_values(ascending=False).head(10)
 fig, ax = plt.subplots()
 sns.barplot(x=top_artists_genre.values, y=top_artists_genre.index, ax=ax, orient='h')
-ax.set_title(f"Top 10 Artists in {selected_subgenre}")
+ax.set_title(f"Top 10 Artists in {selected_subgenre if selected_subgenre != 'All' else selected_genre}")
 st.pyplot(fig)
 
-st.subheader(f"Top 10 Albums in {selected_subgenre}")
+st.subheader(f"Top 10 Albums in {selected_subgenre if selected_subgenre != 'All' else selected_genre}")
 top_albums_genre = filtered_data.groupby('track_album_name')['track_popularity'].mean().sort_values(ascending=False).head(10)
 fig, ax = plt.subplots()
 sns.barplot(x=top_albums_genre.values, y=top_albums_genre.index, ax=ax, orient='h')
-ax.set_title(f"Top 10 Albums in {selected_subgenre}")
+ax.set_title(f"Top 10 Albums in {selected_subgenre if selected_subgenre != 'All' else selected_genre}")
 st.pyplot(fig)
 
 # Visualization 3: Radar Chart for Song Features
@@ -92,7 +111,7 @@ ax.plot(angles, stats, color='blue', linewidth=2)
 ax.set_yticklabels([])
 ax.set_xticks(angles[:-1])
 ax.set_xticklabels(labels)
-ax.set_title(f"Radar Chart for Song Features in {selected_subgenre}")
+ax.set_title(f"Radar Chart for Song Features in {selected_subgenre if selected_subgenre != 'All' else selected_genre}")
 st.pyplot(fig)
 
 # Visualization 4: Top 10 Artists/Albums for Selected Feature
@@ -100,12 +119,12 @@ st.subheader(f"Top 10 Artists by {selected_feature.capitalize()}")
 top_artists_feature = filtered_data.groupby('track_artist')[selected_feature].mean().sort_values(ascending=False).head(10)
 fig, ax = plt.subplots()
 sns.barplot(x=top_artists_feature.values, y=top_artists_feature.index, ax=ax, orient='h')
-ax.set_title(f"Top 10 Artists by {selected_feature.capitalize()} in {selected_subgenre}")
+ax.set_title(f"Top 10 Artists by {selected_feature.capitalize()} in {selected_subgenre if selected_subgenre != 'All' else selected_genre}")
 st.pyplot(fig)
 
 st.subheader(f"Top 10 Albums by {selected_feature.capitalize()}")
 top_albums_feature = filtered_data.groupby('track_album_name')[selected_feature].mean().sort_values(ascending=False).head(10)
 fig, ax = plt.subplots()
 sns.barplot(x=top_albums_feature.values, y=top_albums_feature.index, ax=ax, orient='h')
-ax.set_title(f"Top 10 Albums by {selected_feature.capitalize()} in {selected_subgenre}")
+ax.set_title(f"Top 10 Albums by {selected_feature.capitalize()} in {selected_subgenre if selected_subgenre != 'All' else selected_genre}")
 st.pyplot(fig)
