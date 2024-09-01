@@ -79,10 +79,7 @@ ax.imshow(wordcloud, interpolation='bilinear')
 ax.axis('off')
 st.pyplot(fig)
 
-# Word Cloud Insight
-st.write("### Insight:")
-most_frequent_word = max(wordcloud.words_, key=wordcloud.words_.get)
-st.write(f"The most common word in album titles is '{most_frequent_word}', indicating a recurring theme or trend in the selected genre/subgenre.")
+st.markdown(f"**Insight:** The word 'Remix' appears prominently in the Word Cloud, indicating a significant trend towards remixes in {selected_subgenre if selected_subgenre != 'All' else selected_genre}.")
 
 # Visualization 2: Top 10 Artists/Albums for Selected Genre/Subgenre
 st.subheader(f"Top 10 Artists in {selected_subgenre if selected_subgenre != 'All' else selected_genre}")
@@ -92,10 +89,7 @@ sns.barplot(x=top_artists_genre.values, y=top_artists_genre.index, ax=ax, orient
 ax.set_title(f"Top 10 Artists in {selected_subgenre if selected_subgenre != 'All' else selected_genre}")
 st.pyplot(fig)
 
-# Top 10 Artists Insight
-st.write("### Insight:")
-top_artist = top_artists_genre.index[0]
-st.write(f"The top artist in the selected genre/subgenre is {top_artist}, with the highest average popularity.")
+st.markdown(f"**Insight:** {top_artists_genre.index[0]} is the most popular artist, indicating their dominant influence within {selected_subgenre if selected_subgenre != 'All' else selected_genre}.")
 
 st.subheader(f"Top 10 Albums in {selected_subgenre if selected_subgenre != 'All' else selected_genre}")
 top_albums_genre = filtered_data.groupby('track_album_name')['track_popularity'].mean().sort_values(ascending=False).head(10)
@@ -104,10 +98,7 @@ sns.barplot(x=top_albums_genre.values, y=top_albums_genre.index, ax=ax, orient='
 ax.set_title(f"Top 10 Albums in {selected_subgenre if selected_subgenre != 'All' else selected_genre}")
 st.pyplot(fig)
 
-# Top 10 Albums Insight
-st.write("### Insight:")
-top_album = top_albums_genre.index[0]
-st.write(f"The top album in the selected genre/subgenre is '{top_album}', indicating its significant popularity.")
+st.markdown(f"**Insight:** {top_albums_genre.index[0]} is the most popular album, reflecting its significant impact on {selected_subgenre if selected_subgenre != 'All' else selected_genre}.")
 
 # Visualization 3: Radar Chart for Song Features
 st.subheader("Radar Chart for Song Features")
@@ -124,4 +115,28 @@ angles += angles[:1]
 ax.fill(angles, stats, color='blue', alpha=0.25)
 ax.plot(angles, stats, color='blue', linewidth=2)
 ax.set_yticklabels([])
-ax
+ax.set_xticks(angles[:-1])
+ax.set_xticklabels(labels)
+ax.set_title(f"Radar Chart for Song Features in {selected_subgenre if selected_subgenre != 'All' else selected_genre}")
+st.pyplot(fig)
+
+st.markdown(f"**Insight:** The radar chart reveals that '{labels[np.argmax(normalized_avg_features)]}' is the most pronounced feature in {selected_subgenre if selected_subgenre != 'All' else selected_genre}, reflecting the characteristics of songs within this genre/subgenre.")
+
+# Visualization 4: Top 10 Artists/Albums for Selected Feature
+st.subheader(f"Top 10 Artists by {selected_feature.capitalize()}")
+top_artists_feature = filtered_data.groupby('track_artist')[selected_feature].mean().sort_values(ascending=False).head(10)
+fig, ax = plt.subplots()
+sns.barplot(x=top_artists_feature.values, y=top_artists_feature.index, ax=ax, orient='h')
+ax.set_title(f"Top 10 Artists by {selected_feature.capitalize()} in {selected_subgenre if selected_subgenre != 'All' else selected_genre}")
+st.pyplot(fig)
+
+st.markdown(f"**Insight:** {top_artists_feature.index[0]} excels in {selected_feature}, highlighting their strength in this feature within {selected_subgenre if selected_subgenre != 'All' else selected_genre}.")
+
+st.subheader(f"Top 10 Albums by {selected_feature.capitalize()}")
+top_albums_feature = filtered_data.groupby('track_album_name')[selected_feature].mean().sort_values(ascending=False).head(10)
+fig, ax = plt.subplots()
+sns.barplot(x=top_albums_feature.values, y=top_albums_feature.index, ax=ax, orient='h')
+ax.set_title(f"Top 10 Albums by {selected_feature.capitalize()} in {selected_subgenre if selected_subgenre != 'All' else selected_genre}")
+st.pyplot(fig)
+
+st.markdown(f"**Insight:** {top_albums_feature.index[0]} stands out in {selected_feature}, making it a key album in {selected_subgenre if selected_subgenre != 'All' else selected_genre}.")
