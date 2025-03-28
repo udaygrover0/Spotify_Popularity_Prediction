@@ -31,9 +31,3 @@ We would like to express our gratitude to the following individuals and sources 
 
 - **Joakim Arvidsson**:  
   We acknowledge the work of Joakim Arvidsson, whose repository on [Kaggle](https://www.kaggle.com/datasets/joebeachcapital/30000-spotify-songs/data) served as a valuable reference for understanding and implementing this project.
-
-## Project Group Members
-
-- **Aastha Sharma** - 321003
-- **Arushi Khanna** - 321012
-- **Uday Grover** - 321057
